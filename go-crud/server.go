@@ -3,14 +3,28 @@ package main
 import (
 	"flag"
 	routes "go-crud/src/controllers"
+	"go-crud/src/databases"
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 var addr = flag.String("addr", ":8080", "http service address")
 
+
+func init() {
+
+    err := godotenv.Load(".env")
+
+    if err != nil {
+        log.Fatal("Error loading .env file")
+    }
+}
+
 func main() {
+	
+	databases.InitDatabase()
 	router := gin.Default()
 	router.GET("/albums", routes.GetAlbums)
 	router.GET("/albums/:id", routes.GetAlbumByID)
