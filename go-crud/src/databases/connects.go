@@ -1,46 +1,51 @@
 package databases
 
 import (
-	"database/sql"
 	"fmt"
-	"os"
+	"go-crud/src/databases/models"
+	"net/url"
 
-	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-var db *sql.DB
+var db *gorm.DB
+
+var albums = []models.Albums{
+	{Title: "Blue Train", Artist: "John Coltrane", Price: 56.99},
+	{Title: "Jeru", Artist: "Gerry Mulligan", Price: 17.99},
+	{Title: "Sarah Vaughan and Clifford Brown", Artist: "Sarah Vaughan", Price: 39.99},
+}
 
 // This function will make a connection to the database only once.
-func InitDatabase() {
+func InitDB() (*gorm.DB, error) {
 	var err error
 
-	connStr,ok := os.LookupEnv("POSTGRES_CONNECT_URL")
-
-	if !ok{
-		fmt.Println("Not found POSTGRES_CONNECT_URL")
+	dsn := url.URL{
+		User:     url.UserPassword(USER, PASSWORD),
+		Scheme:   "postgres",
+		Host:     fmt.Sprintf("%s:%d", HOST, PORT),
+		Path:     DATABASE,
+		RawQuery: (&url.Values{"sslmode": []string{"disable"}}).Encode(),
 	}
 
-	db, err = sql.Open("postgres", connStr)
+	db, err := gorm.Open(postgres.Open(dsn.String()), &gorm.Config{})
+
 	if err != nil {
 		panic(err)
 	}
-	
-	if err = db.Ping(); err != nil {
-		panic(err)
-	}
-	
-    insertStmt := `CREATE TABLE public.albums (
-    name text NOT NULL,
-    id bigint NOT NULL,
-    price money,
-    description text,
-    PRIMARY KEY (id)
-    )`
-    _, e := db.Exec(insertStmt)
+	var (
+		albumsList []models.Albums
+	)
+	db.AutoMigrate(&models.Albums{})
 
-	if e != nil {
-		panic(err)
+	db.Find(&albumsList)
+	if len(albumsList) <= 0 {
+		for index := range albums {
+			db.Create(&albums[index])
+		}
 	}
 
 	fmt.Println("The database is connected")
+	return db, nil
 }

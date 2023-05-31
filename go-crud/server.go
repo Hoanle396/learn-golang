@@ -12,19 +12,23 @@ import (
 
 var addr = flag.String("addr", ":8080", "http service address")
 
-
 func init() {
 
-    err := godotenv.Load(".env")
+	err := godotenv.Load(".env")
 
-    if err != nil {
-        log.Fatal("Error loading .env file")
-    }
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 }
 
 func main() {
-	
-	databases.InitDatabase()
+
+	var db, e = databases.InitDB()
+	if e != nil {
+		log.Fatal("Error loading database")
+	}
+	routes.DB = db
+
 	router := gin.Default()
 	router.GET("/albums", routes.GetAlbums)
 	router.GET("/albums/:id", routes.GetAlbumByID)
