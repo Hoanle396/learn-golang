@@ -68,3 +68,14 @@ func UpdateAlbumByID(ctx *gin.Context) {
 	}
 	ctx.IndentedJSON(http.StatusNotFound, gin.H{"status": 404, "message": "album not found"})
 }
+
+func GetProjectWithSpaces(ctx *gin.Context) {
+	projectID := ctx.Param("id")
+
+	var project models.Project
+	if err := DB.Preload("Spaces").Preload("Members").Preload("Leader").Preload("Owner").First(&project, projectID).Error; err != nil {
+		ctx.IndentedJSON(http.StatusNotFound, gin.H{"status": 404, "message": "project not found"})
+		return
+	}
+	ctx.IndentedJSON(http.StatusOK, project)
+}

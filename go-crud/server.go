@@ -4,6 +4,7 @@ import (
 	"flag"
 	routes "go-crud/src/controllers"
 	"go-crud/src/databases"
+	"go-crud/src/middleware"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -29,11 +30,29 @@ func main() {
 	}
 	routes.DB = db
 
-	router := gin.Default()
-	router.GET("/albums", routes.GetAlbums)
-	router.GET("/albums/:id", routes.GetAlbumByID)
-	router.POST("/albums", routes.PostAlbums)
-	router.PUT("/albums/:id", routes.UpdateAlbumByID)
-	router.DELETE("/albums/:id", routes.DeleteAlbumById)
+	router := initRouter()
 	log.Fatal(router.Run(*addr))
+}
+
+func initRouter() *gin.Engine {
+	router := gin.Default()
+	api := router.Group("/api")
+	{
+		api.POST("/login", routes.Login)
+		secured := api.Use(middleware.Auth())
+		{
+			secured.GET("/albums", routes.GetAlbums)
+			secured.GET("/albums/:id", routes.GetAlbumByID)
+			secured.POST("/albums", routes.PostAlbums)
+			secured.PUT("/albums/:id", routes.UpdateAlbumByID)
+			secured.DELETE("/albums/:id", routes.DeleteAlbumById)
+			secured.GET("/project/:id", routes.GetProjectWithSpaces)
+		}
+	}
+	router.NoRoute(func(ctx *gin.Context) {
+		ctx.JSON(404, gin.H{"status": 404, "message": "404 - Page Not Found"})
+		ctx.Abort()
+		return
+	})
+	return router
 }
