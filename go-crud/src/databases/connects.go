@@ -34,10 +34,9 @@ func InitDB() (*gorm.DB, error) {
 	if err != nil {
 		panic(err)
 	}
-	var (
-		albumsList []models.Albums
-	)
-	db.AutoMigrate(&models.Albums{})
+	var albumsList []models.Albums
+
+	db.AutoMigrate(&models.Albums{}, &models.User{}, &models.Project{}, &models.Space{}, &models.Task{})
 
 	db.Find(&albumsList)
 	if len(albumsList) <= 0 {
