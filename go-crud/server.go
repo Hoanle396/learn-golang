@@ -39,6 +39,7 @@ func initRouter() *gin.Engine {
 	api := router.Group("/api")
 	{
 		api.POST("/login", routes.Login)
+		api.POST("/register", routes.RegisterUser)
 		secured := api.Use(middleware.Auth())
 		{
 			secured.GET("/albums", routes.GetAlbums)

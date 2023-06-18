@@ -10,7 +10,7 @@ type User struct {
 
 	Name     string `json:"name"`
 	Email    string `json:"email"`
-	Password string `json:"password"`
+	Password string `json:"password,omitempty"`
 	Verified bool   `json:"verified" gorm:"default:false"`
 	Wallet   int64  `json:"wallet" gorm:"default:0"`
 	ProjectsOwned    []Project `json:"project_owner" gorm:"foreignKey:OwnerID"`
