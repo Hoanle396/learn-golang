@@ -44,8 +44,15 @@ func Login(context *gin.Context) {
 
 func RegisterUser(context *gin.Context) {
 	var user models.User
+	var userExits models.User
 	if err := context.ShouldBindJSON(&user); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.Abort()
+		return
+	}
+	exits := DB.Where("email = ?", user.Email).First(&userExits)
+	if exits.RowsAffected > 0 {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Email already in use"})
 		context.Abort()
 		return
 	}
