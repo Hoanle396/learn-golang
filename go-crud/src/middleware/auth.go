@@ -12,12 +12,13 @@ func Auth() gin.HandlerFunc {
 		parts := strings.Split(context.GetHeader("Authorization"), "Bearer ")
 		if len(parts) == 2 {
 			token := parts[1]
-			err := services.ValidateToken(token)
+			user, err := services.ValidateToken(token)
 			if err != nil {
 				context.JSON(401, gin.H{"status": 401, "message": "Unauthorized"})
 				context.Abort()
 				return
 			}
+			context.Request.Header.Set("email", user.Email)
 			context.Next()
 
 		} else {
