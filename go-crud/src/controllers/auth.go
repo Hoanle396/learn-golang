@@ -9,6 +9,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func Me(context *gin.Context) {
+	email := context.Request.Header.Get("email")
+	var user models.User
+	record := DB.Where(models.User{Email: email}).First(&user)
+	if record.Error != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": record.Error.Error()})
+		context.Abort()
+		return
+	}
+	context.IndentedJSON(http.StatusOK, user)
+}
+
 func Login(context *gin.Context) {
 	var request requests.LoginRequest
 	var user models.User

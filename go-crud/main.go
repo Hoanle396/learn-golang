@@ -42,6 +42,7 @@ func initRouter() *gin.Engine {
 		api.POST("/register", routes.RegisterUser)
 		secured := api.Use(middleware.Auth())
 		{
+			secured.GET("/me", routes.Me)
 			secured.GET("/albums", routes.GetAlbums)
 			secured.GET("/albums/:id", routes.GetAlbumByID)
 			secured.POST("/albums", routes.PostAlbums)
